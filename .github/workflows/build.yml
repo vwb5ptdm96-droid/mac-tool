@@ -1,0 +1,35 @@
+name: Build Mac App
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller psutil mysql-connector-python
+      
+      - name: Build .app
+        run: |
+          pyinstaller --onefile --windowed \
+            --name="资产采集工具" \
+            --hidden-import=mysql.connector \
+            --hidden-import=psutil \
+            --collect-all=mysql.connector \
+            mac_asset_collector.py
+      
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mac-App
+          path: dist/资产采集工具.app
